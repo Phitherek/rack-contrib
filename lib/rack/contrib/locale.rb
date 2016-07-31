@@ -1,3 +1,5 @@
+require 'i18n'
+
 module Rack
   class Locale
     def initialize(app)
@@ -5,12 +7,15 @@ module Rack
     end
 
     def call(env)
+      old_locale = I18n.locale
       begin
         locale = accept_locale(env)
         locale = env['rack.locale'] = locale.to_s
         status, headers, body = @app.call(env)
         headers['Content-Language'] = locale unless headers['Content-Language']
         [status, headers, body]
+      ensure
+        I18n.locale = old_locale
       end
     end
 
